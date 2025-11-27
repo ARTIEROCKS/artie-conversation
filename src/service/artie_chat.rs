@@ -30,6 +30,11 @@ impl Chat for ArtieChat {
         }
         updated_conversation.push(("user".to_string(), user_prompt.clone()));
 
+        // Persist user message immediately
+        if let Err(err) = self.update_conversation(&user_id, &context_id, &updated_conversation, conversation.len() == 0).await {
+            error!("Error updating conversation with user message in MongoDB: {}", err);
+        }
+
         let reply = match call_chatgpt_api(&updated_conversation).await {
             Ok(response) => {
                 info!("Received response from ChatGPT API: {}", response);
